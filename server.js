@@ -1,9 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000; <--- REMOVED
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -38,6 +39,11 @@ const fetchWithRetry = async (url, options, maxRetries = 3) => {
         }
     }
 };
+
+// ADDED: Root route to fix "Cannot GET /" error
+app.get('/', (req, res) => {
+    res.status(200).send('Sparkle Travel Planner API is running!');
+});
 
 app.post('/api/plan-trip', async (req, res) => {
     const { destination, origin, experience } = req.body;
@@ -98,6 +104,10 @@ app.post('/api/plan-trip', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running securely at http://localhost:${port}`);
-});
+// REMOVED: app.listen()
+// app.listen(port, () => {
+//     console.log(`Server running securely at http://localhost:${port}`);
+// });
+
+// ADDED: Export the Express app instance for Vercel
+export default app;

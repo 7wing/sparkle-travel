@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "vercel-build": "node server.js"
+    "build": "echo 'Vercel will use the server.js Serverless Function'"
   },
   "keywords": [],
   "author": "",
