@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparkle Travel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/dompurify@2.4.0/dist/purify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Sparkle Travel Planner</h1>
+            <p class="text-xl text-gray-600">AI-Powered Planning & Local Risk Assessment</p>
+        </header>
+
+        <div class="space-y-4">
+            
+            <label for="originInput" class="block text-lg font-medium text-gray-700">Where are you traveling from?</label>
+            <input
+                type="text"
+                id="originInput"
+                placeholder="E.g., New York, NY (JFK) or London (LHR)"
+                class="w-full p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150"
+            >
+
+            <label for="destinationInput" class="block text-lg font-medium text-gray-700 pt-2">Where are you traveling to?</label>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input
+                    type="text"
+                    id="destinationInput"
+                    placeholder="E.g., Tokyo, Japan (Include currency for best price results)"
+                    class="flex-grow p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150"
+                >
+                <button
+                    id="planTripButton"
+                    class="bg-blue-600 text-white p-3 rounded-xl font-semibold shadow-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                    <span id="button-text">Plan My Trip</span>
+                    <div id="loading-indicator" class="hidden w-5 h-5 border-2 border-white border-solid rounded-full loading-spinner ml-2"></div>
+                </button>
+            </div>
+
+            <label for="experienceInput" class="block text-lg font-medium text-gray-700 pt-2">What kind of experience are you looking for?</label>
+            <textarea
+                id="experienceInput"
+                placeholder="E.g., 'Looking for romantic, secluded beaches and five-star dining' or 'Need budget-friendly hostels and extreme sports activities.'"
+                rows="3"
+                class="w-full p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-150"
+            ></textarea>
+
+            <p class="text-sm text-gray-500 mt-1">We use Google Search to provide up-to-the-minute prices, news, and safety data.</p>
+        </div>
+
+        <div id="results-area" class="mt-10 pt-6 border-t border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4" id="results-title" style="display: none;">Your Travel Report:</h2>
+            <div id="results-container" class="bg-gray-50 p-6 rounded-xl shadow-inner min-h-[200px] transition-all duration-500">
+                <p class="text-gray-500" id="placeholder-text">Enter your destination above and click "Plan My Trip" to generate your comprehensive travel report.</p>
+            </div>
+            
+            <div id="sources-container" class="mt-4 p-4 border-t border-gray-200" style="display: none;">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Sources Referenced:</h3>
+                <ul id="source-list" class="space-y-1 text-sm text-gray-600">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
