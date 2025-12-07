@@ -7,7 +7,7 @@ const app = express();
 // const port = process.env.PORT || 3000; <--- REMOVED
 
 app.use(express.json());
-app.use(express.static('public'));
+// app.use(express.static('public'));
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_BASE_URL = process.env.GEMINI_API_URL;
