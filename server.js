@@ -40,11 +40,6 @@ const fetchWithRetry = async (url, options, maxRetries = 3) => {
     }
 };
 
-// ADDED: Root route to fix "Cannot GET /" error
-app.get('/', (req, res) => {
-    res.status(200).send('Sparkle Travel Planner API is running!');
-});
-
 app.post('/api/plan-trip', async (req, res) => {
     const { destination, origin, experience } = req.body;
 
