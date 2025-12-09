@@ -4,100 +4,106 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000; // restored
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static('public')); // optional if you want to serve static files
+// ❌ COMMENT OUT: Vercel's build configuration handles static files (public) directly.
+// Vercel routes will serve your static files before hitting this serverless function.
+// app.use(express.static('public'));
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_BASE_URL = process.env.GEMINI_API_URL;
 
 const fetchWithRetry = async (url, options, maxRetries = 3) => {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const response = await fetch(url, options);
-      if (response.ok) {
-        return response;
-      }
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) {
+        return response;
+      }
 
-      if (response.status === 403 || response.status === 429 || response.status >= 500) {
-        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-        if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-      }
-      const errorBody = await response.text();
-      throw new Error(`Gemini API error! Status: ${response.status}. Body: ${errorBody}`);
+      if (response.status === 403 || response.status === 429 || response.status >= 500) {
+        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+      const errorBody = await response.text();
+      throw new Error(`Gemini API error! Status: ${response.status}. Body: ${errorBody}`);
 
-    } catch (error) {
-      if (i === maxRetries - 1) {
-        throw error;
-      }
-      const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
+    } catch (error) {
+      if (i === maxRetries - 1) {
+        throw error;
+      }
+      const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 };
 
 app.post('/api/plan-trip', async (req, res) => {
-  const { destination, origin, experience } = req.body;
+  const { destination, origin, experience } = req.body;
 
-  if (!destination) {
-    return res.status(400).json({ error: 'Destination is required.' });
-  }
-  if (!GEMINI_API_KEY || !GEMINI_BASE_URL) {
-    return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY or GEMINI_API_URL is missing.' });
-  }
+  if (!destination) {
+    return res.status(400).json({ error: 'Destination is required.' });
+  }
+  if (!GEMINI_API_KEY || !GEMINI_BASE_URL) {
+    return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY or GEMINI_API_URL is missing.' });
+  }
 
-  const systemPrompt = `You are a specialized, comprehensive travel analyst and risk assessor. Your task is to provide a detailed, single-block travel report for the user's requested destination, using real-time information from Google Search.
+  const systemPrompt = `You are a specialized, comprehensive travel analyst and risk assessor. Your task is to provide a detailed, single-block travel report for the user's requested destination, using real-time information from Google Search.
 
-  ## 1. Logistics & Booking Estimates
-  - Provide current flight price ranges for travel from ${origin || 'the user\'s origin city'} (including airports searched).
-  - List accommodation type recommendations and price estimates (e.g., luxury, mid-range, budget hostels).
+  ## 1. Logistics & Booking Estimates
+  - Provide current flight price ranges for travel from ${origin || 'the user\'s origin city'} (including airports searched).
+  - List accommodation type recommendations and price estimates (e.g., luxury, mid-range, budget hostels).
 
-  ## 2. Local Safety & Real-Time News
-  - Summarize the latest, most relevant news or advisories for travelers.
-  - Provide an objective assessment of the crime rate and specific safety concerns.
-  - Clearly identify areas that are known to be tourism-friendly and those that are recommended to avoid.
+  ## 2. Local Safety & Real-Time News
+  - Summarize the latest, most relevant news or advisories for travelers.
+  - Provide an objective assessment of the crime rate and specific safety concerns.
+  - Clearly identify areas that are known to be tourism-friendly and those that are recommended to avoid.
 
-  ## 3. Culture, Food & Guides
-  - Recommend must-try local foods and dining areas.
-  - List major travel centers (e.g., transit hubs, main information offices).
-  - Recommend 1-3 highly-rated, local travel guides or guide services.`;
+  ## 3. Culture, Food & Guides
+  - Recommend must-try local foods and dining areas.
+  - List major travel centers (e.g., transit hubs, main information offices).
+  - Recommend 1-3 highly-rated, local travel guides or guide services.`;
 
-  let userQuery = `Generate a full travel intelligence report for traveling from ${origin || 'an unspecified location'} to: ${destination}.`;
-  if (experience) {
-    userQuery += ` The user is specifically looking for the following experience: ${experience}. Tailor all recommendations (accommodation, food, guides, and area suggestions) to meet this request.`;
-  }
+  let userQuery = `Generate a full travel intelligence report for traveling from ${origin || 'an unspecified location'} to: ${destination}.`;
+  if (experience) {
+    userQuery += ` The user is specifically looking for the following experience: ${experience}. Tailor all recommendations (accommodation, food, guides, and area suggestions) to meet this request.`;
+  }
 
-  const payload = {
-    contents: [{ parts: [{ text: userQuery }] }],
-    tools: [{ "google_search": {} }],
-    systemInstruction: {
-      parts: [{ text: systemPrompt }]
-    },
-  };
+  const payload = {
+    contents: [{ parts: [{ text: userQuery }] }],
+    tools: [{ "google_search": {} }],
+    systemInstruction: {
+      parts: [{ text: systemPrompt }]
+    },
+  };
 
-  const apiUrlWithKey = `${GEMINI_BASE_URL}?key=${GEMINI_API_KEY}`;
+  const apiUrlWithKey = `${GEMINI_BASE_URL}?key=${GEMINI_API_KEY}`;
 
-  try {
-    const apiResponse = await fetchWithRetry(apiUrlWithKey, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  try {
+    const apiResponse = await fetchWithRetry(apiUrlWithKey, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    const result = await apiResponse.json();
-    res.json(result);
+    const result = await apiResponse.json();
+    res.json(result);
 
-  } catch (error) {
-    console.error("Backend API Error:", error.message);
-    res.status(500).json({ error: 'Internal server error processing request.' });
-  }
+  } catch (error) {
+    console.error("Backend API Error:", error.message);
+    res.status(500).json({ error: 'Internal server error processing request.' });
+  }
 });
 
-// ✅ Normal Express server listen
-app.listen(port, () => {
-  console.log(`Server running securely at http://localhost:${port}`);
-});
+// ❌ COMMENT OUT: Vercel runs your app as a Serverless Function,
+// which means Vercel handles the port/listener. This line will break the deployment.
+// app.listen(port, () => {
+//   console.log(`Server running securely at http://localhost:${port}`);
+// });
+
+// ✅ ADD THIS: Export the Express app instance so the Vercel Serverless Function runtime can use it.
+export default app;
