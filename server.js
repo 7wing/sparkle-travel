@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 // ❌ COMMENT OUT: Vercel's build configuration handles static files (public) directly.
 // Vercel routes will serve your static files before hitting this serverless function.
-// app.use(express.static('public'));
+app.use(express.static(path.join(process.cwd(), "public")));
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_BASE_URL = process.env.GEMINI_API_URL;
