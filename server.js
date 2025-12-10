@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -6,7 +5,6 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-// reconstruct __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -15,8 +13,6 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// ✅ Serve static files locally (optional). On Vercel, static files in /public are served automatically.
-// If you want to keep this for local dev, it’s safe:
 app.use(express.static(path.join(__dirname, 'public')));
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -106,10 +102,8 @@ app.post('/api/plan-trip', async (req, res) => {
   }
 });
 
-// ❌ Do not call app.listen() on Vercel
 // app.listen(port, () => {
 //   console.log(`Server running securely at http://localhost:${port}`);
 // });
 
-// ✅ Export the app for Vercel
 export default app;

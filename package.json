@@ -7,8 +7,26 @@
   "scripts": {
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "AI",
+    "travel",
+    "planner",
+    "Gemini",
+    "Google AI",
+    "Express",
+    "Node.js",
+    "fullstack",
+    "API integration",
+    "Markdown rendering",
+    "DOMPurify",
+    "secure proxy",
+    "personalized reports",
+    "logistics",
+    "safety",
+    "cultural recommendations",
+    "Vercel deployment"
+  ],
+  "author": "7wing",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
